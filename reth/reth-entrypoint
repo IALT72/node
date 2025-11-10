@@ -13,6 +13,7 @@ ADDITIONAL_ARGS=""
 NODE_TYPE="${NODE_TYPE:-base}"
 RETH_HISTORICAL_PROOFS="${RETH_HISTORICAL_PROOFS:-false}"
 RETH_HISTORICAL_PROOFS_STORAGE_PATH="${RETH_HISTORICAL_PROOFS_STORAGE_PATH:-}"
+LOG_LEVEL="${LOG_LEVEL:-info}"
 
 if [[ -z "${RETH_CHAIN:-}" ]]; then
     echo "expected RETH_CHAIN to be set" 1>&2
@@ -21,7 +22,7 @@ fi
 
 # Add Flashblocks support for base mode
 if [[ "$NODE_TYPE" == "base" && -n "${RETH_FB_WEBSOCKET_URL:-}" ]]; then
-    ADDITIONAL_ARGS="--websocket-url=$RETH_FB_WEBSOCKET_URL"
+    ADDITIONAL_ARGS="$ADDITIONAL_ARGS --websocket-url=$RETH_FB_WEBSOCKET_URL"
     echo "Enabling Flashblocks support with endpoint: $RETH_FB_WEBSOCKET_URL"
 fi
 
@@ -33,6 +34,19 @@ else
     echo "Starting OP Reth node"
     BINARY="./op-reth"
 fi
+
+case "$LOG_LEVEL" in
+    "debug")
+        LOG_LEVEL="vvvv"
+        ;;
+    "warn")
+        LOG_LEVEL="vv"
+        ;;
+    "info")
+    *)
+        LOG_LEVEL="vvv"
+        ;;
+esac
 
 # Add pruning for base
 if [[ "$NODE_TYPE" == "base" && "${RETH_PRUNING_ARGS+x}" = x ]]; then
@@ -48,7 +62,7 @@ mkdir -p "$RETH_DATA_DIR"
 echo "$OP_NODE_L2_ENGINE_AUTH_RAW" > "$OP_NODE_L2_ENGINE_AUTH"
 
 exec "$BINARY" node \
-  -vvv \
+  -$LOG_LEVEL \
   --datadir="$RETH_DATA_DIR" \
   --log.stdout.format json \
   --ws \
