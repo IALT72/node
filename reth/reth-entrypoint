@@ -42,8 +42,7 @@ case "$LOG_LEVEL" in
     "warn")
         LOG_LEVEL="vv"
         ;;
-    "info")
-    *)
+    "info"|*)
         LOG_LEVEL="vvv"
         ;;
 esac
